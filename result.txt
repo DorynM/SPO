@@ -1,0 +1,64 @@
+S
+	expr
+		assign_expr
+			VAR a
+			ASSIGN_OP =
+			math_expr
+				NUMBER 7
+	expr
+		assign_expr
+			VAR b
+			ASSIGN_OP =
+			math_expr
+				NUMBER 3
+	expr
+		while_expr
+			LBreaket
+				math_logic
+					LBreaket
+					math_logic
+						VAR b
+						OP +
+						math_logic
+							NUMBER 3
+					RBreaket
+					LOGICAL_OP>
+					math_logic
+						VAR b
+			RBreaket
+			LFBreaket
+				expr
+					if_expr
+						LBreaket
+							math_logic
+								VAR a
+								LOGICAL_OP >
+								math_logic
+									VAR b
+						RBreaket
+						LFBreaket
+							expr
+								assign_expr
+									VAR b
+									ASSIGN_OP =
+									math_expr
+										VAR b
+										OP +
+										math_expr
+											NUMBER 1
+						RFBreaket
+					ELSE
+						LFBreaket
+							expr
+							expr
+								assign_expr
+									VAR a
+									ASSIGN_OP =
+									math_expr
+										VAR b
+										OP +
+										math_expr
+											NUMBER 4
+						RFBreaket
+			RFBreaket
+
