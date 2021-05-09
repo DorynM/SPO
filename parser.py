@@ -91,11 +91,11 @@ class Parser:
             self.i += 1
             num_L = 1
             while num_L:
-                self.i += 1
                 if list(self.start[self.i].keys())[0] == 'RFBreaket':
                     num_L -= 1
 
                 if num_L:
+                    self.i += 1
                     self.height = start_height
                     self.height += 1
                     expr = self.expr()
@@ -104,6 +104,7 @@ class Parser:
             if_expr.children.append(Node('RFBreaket', height=start_height))
 
             if self.i < len(self.start) - 1:
+                print(self.start[self.i])
                 self.check_next('ELSE')
                 self.i += 1
                 self.check_next('LFBreaket')
@@ -115,17 +116,15 @@ class Parser:
                 num_L = 1
 
                 while num_L:
-                    self.i += 1
+
                     if list(self.start[self.i].keys())[0] == 'RFBreaket':
                         num_L -= 1
-
                     if num_L:
+                        self.i += 1
                         self.height = start_height
                         self.height += 1
                         expr = self.expr()
                         if_expr.children.append(expr)
-
-            if_expr.children.append(Node('RFBreaket', height=start_height))
 
             return if_expr
 
@@ -149,9 +148,10 @@ class Parser:
             num_L = 1
 
             while num_L:
-                self.i += 1
+                print(self.i, len(self.start))
                 if list(self.start[self.i].keys())[0] == 'RFBreaket':
                     num_L -= 1
+                self.i += 1
                 if num_L:
                     self.height = start_height
                     self.height += 1
@@ -355,5 +355,5 @@ class Parser:
 
 L = Lexer()
 L.get_term('q.txt')
-p = Parser(L.list_tokens)
-print(p.S())
+P = Parser(L.list_tokens)
+print(P.S())
