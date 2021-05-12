@@ -2,16 +2,16 @@ import re
 
 
 class Lexer(object):
-    def __init__(self):
-        self.token = {"IF": "^if$", "ELSE": "^else$", "WHILE": "^while$",
-                      "OP": "^[-+*/]$", "LOGICAL_OP": r"^==|>|>=|<|<=$",
-                      "LBreaket": "^[(]$", "RBreaket": "^[)]$",
-                      "END_COM": "^;$", "LFBreaket": "^[{]$",
-                      "RFBreaket": "^[}]$", "ASSIGN_OP": "^=$",
-                      "ENDCOM": "^;$", "NUMBER": r"^0|([1-9][0-9]*)$",
-                      "STR": r"'[^']*'", "VAR": "^[a-zA-Z0-9_]+$",
-                      "UNDEFINED": r".*[^.]*"}
+    token = {"IF": "^if$", "ELSE": "^else$", "WHILE": "^while$",
+                  "OP": "^[-+*/]$", "LOGICAL_OP": r"^==|>|>=|<|<=|!=$",
+                  "LBreaket": "[(]", "RBreaket": "[)]",
+                  "END_COM": "^;$", "LFBreaket": "^[{]$",
+                  "RFBreaket": "^[}]$", "ASSIGN_OP": "^=$",
+                  "ENDCOM": "^;$", "NUMBER": r"^0|([1-9][0-9]*)$",
+                  "STR": r"'[^']*'", "VAR": "^[a-zA-Z0-9_]+$",
+                  "UNDEFINED": r".*[^.]*"}
 
+    def __init__(self):
         self.list_tokens = []
 
     def __set_token(self, item):
@@ -35,7 +35,6 @@ class Lexer(object):
 
                     buffer += char
                     token = self.__set_token(buffer)
-
                     if token == "UNDEFINED":
                         if len(buffer) and not last_token == "UNDEFINED":
                             self.list_tokens.append({last_token: buffer[:-1]})
@@ -43,3 +42,7 @@ class Lexer(object):
                             buffer = buffer[-1]
                         else:
                             buffer = ''
+
+            token = self.__set_token(buffer)
+            if not token == "UNDEFINED":
+                self.list_tokens.append({token: buffer[0]})

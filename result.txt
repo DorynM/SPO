@@ -1,63 +1,110 @@
-S
+Tokens: [{'VAR': 'a'}, {'ASSIGN_OP': '='}, {'NUMBER': '5'}, {'END_COM': ';'}, {'VAR': 'b'}, {'ASSIGN_OP': '='}, {'NUMBER': '1'}, {'END_COM': ';'}, {'VAR': 'c'}, {'ASSIGN_OP': '='}, {'NUMBER': '3'}, {'END_COM': ';'}, {'WHILE': 'while'}, {'LBreaket': '('}, {'VAR': 'a'}, {'LOGICAL_OP': '>'}, {'VAR': 'b'}, {'RBreaket': ')'}, {'LFBreaket': '{'}, {'IF': 'if'}, {'LBreaket': '('}, {'VAR': 'a'}, {'LOGICAL_OP': '>'}, {'VAR': 'c'}, {'RBreaket': ')'}, {'LFBreaket': '{'}, {'VAR': 'c'}, {'ASSIGN_OP': '='}, {'VAR': 'b'}, {'OP': '-'}, {'NUMBER': '3'}, {'END_COM': ';'}, {'RFBreaket': '}'}, {'ELSE': 'else'}, {'LFBreaket': '{'}, {'IF': 'if'}, {'LBreaket': '('}, {'VAR': 'b'}, {'LOGICAL_OP': '>'}, {'VAR': 'c'}, {'RBreaket': ')'}, {'LFBreaket': '{'}, {'VAR': 'b'}, {'ASSIGN_OP': '='}, {'VAR': 'b'}, {'OP': '+'}, {'NUMBER': '3'}, {'END_COM': ';'}, {'RFBreaket': '}'}, {'ELSE': 'else'}, {'LFBreaket': '{'}, {'VAR': 'a'}, {'ASSIGN_OP': '='}, {'VAR': 'b'}, {'OP': '-'}, {'NUMBER': '3'}, {'END_COM': ';'}, {'RFBreaket': '}'}, {'RFBreaket': '}'}, {'VAR': 'c'}, {'ASSIGN_OP': '='}, {'VAR': 'a'}, {'OP': '+'}, {'NUMBER': '5'}, {'END_COM': ';'}, {'RFBreaket': '}'}, {'VAR': 'a'}, {'ASSIGN_OP': '='}, {'VAR': 'a'}, {'OP': '+'}, {'NUMBER': '4'}, {'END_COM': ';'}]
+Tree:
+ S
 	expr
 		assign_expr
 			VAR a
 			ASSIGN_OP =
 			math_expr
-				NUMBER 7
+				NUMBER 5
 	expr
 		assign_expr
 			VAR b
 			ASSIGN_OP =
 			math_expr
+				NUMBER 1
+	expr
+		assign_expr
+			VAR c
+			ASSIGN_OP =
+			math_expr
 				NUMBER 3
 	expr
 		while_expr
-			LBreaket
+			LBreaket (
 				math_logic
-					LBreaket
-					math_logic
-						VAR b
-						OP +
-						math_logic
-							NUMBER 3
-					RBreaket
-					LOGICAL_OP>
+					VAR a
+					LOGICAL_OP >
 					math_logic
 						VAR b
 			RBreaket
 			LFBreaket
 				expr
 					if_expr
-						LBreaket
+						LBreaket (
 							math_logic
 								VAR a
 								LOGICAL_OP >
 								math_logic
-									VAR b
+									VAR c
 						RBreaket
 						LFBreaket
 							expr
 								assign_expr
-									VAR b
+									VAR c
 									ASSIGN_OP =
 									math_expr
 										VAR b
-										OP +
+										OP -
 										math_expr
-											NUMBER 1
+											NUMBER 3
 						RFBreaket
 					ELSE
 						LFBreaket
 							expr
 							expr
-								assign_expr
-									VAR a
-									ASSIGN_OP =
-									math_expr
-										VAR b
-										OP +
-										math_expr
-											NUMBER 4
+								if_expr
+									LBreaket (
+										math_logic
+											VAR b
+											LOGICAL_OP >
+											math_logic
+												VAR c
+									RBreaket
+									LFBreaket
+										expr
+											assign_expr
+												VAR b
+												ASSIGN_OP =
+												math_expr
+													VAR b
+													OP +
+													math_expr
+														NUMBER 3
+									RFBreaket
+								ELSE
+									LFBreaket
+										expr
+										expr
+											assign_expr
+												VAR a
+												ASSIGN_OP =
+												math_expr
+													VAR b
+													OP -
+													math_expr
+														NUMBER 3
+									RFBreaket
 						RFBreaket
+				expr
+					assign_expr
+						VAR c
+						ASSIGN_OP =
+						math_expr
+							VAR a
+							OP +
+							math_expr
+								NUMBER 5
 			RFBreaket
+	expr
+		assign_expr
+			VAR a
+			ASSIGN_OP =
+			math_expr
+				VAR a
+				OP +
+				math_expr
+					NUMBER 4
+
+stack: ['a', '5', '=', 'b', '1', '=', 'c', '3', '=', 'a', 'b', '>', 45, 'a', 'c', '>', 22, 'c', 'b', '3', '-', '=', '!40', 40, 'b', 'c', '>', 33, 'b', 'b', '3', '+', '=', '!40', 40, 'a', 'b', '3', '-', '=', 'c', 'a', '5', '+', '=', '!9', 'a', 'a', '4', '+', '=']
+variables: {'a': 2, 'b': 1, 'c': 3}

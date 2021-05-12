@@ -1,32 +1,3 @@
-from Lexer import Lexer
-
-
-class Node:
-    def __init__(self, name='', value='', height=0):
-        self.children = []
-        self.name = name
-        self.value = value
-        self.height = height
-        self.rpn = []
-        self.buffer = []
-
-    def __repr__(self):
-        str_end = ''
-        for child in self.children:
-            str_end += "\t" * child.height + f'{child}'
-        return f'{self.name}\n{str_end}'
-
-
-class Leaf:
-    def __init__(self, name='', value='', height=0):
-        self.name = name
-        self.value = value
-        self.height = height
-
-    def __repr__(self):
-        return f'{self.name} {self.value}\n'
-
-
 class Parser:
     def __init__(self, lexer):
         self.height = 0
@@ -35,7 +6,6 @@ class Parser:
         self.LB = 0
 
     def S(self):
-        print(self.start)
         S = Node('S')
         while self.i < len(self.start) - 1:
             self.height = 1
@@ -48,11 +18,11 @@ class Parser:
     def expr(self):
         expr = Node('expr', height=self.height)
         self.height += 1
+
         token = list(self.start[self.i].keys())[0]
         if token == "VAR":
             assign_expr = self.assign_expr()
             expr.children.append(assign_expr)
-            expr.rpn = assign_expr.rpn.copy()
             self.height -= 1
             return expr
 
@@ -76,7 +46,7 @@ class Parser:
         self.height += 1
         start_height = self.height
         self.check_next('LBreaket')
-        if_expr.children.append(Node('LBreaket', height=self.height))
+        if_expr.children.append(Leaf('LBreaket', '(', height=self.height))
         self.i += 2
         self.height += 1
         token = list(self.start[self.i].keys())[0]
@@ -93,18 +63,24 @@ class Parser:
             while num_L:
                 if list(self.start[self.i].keys())[0] == 'RFBreaket':
                     num_L -= 1
-
+                if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                    num_L += 1
                 if num_L:
                     self.i += 1
                     self.height = start_height
                     self.height += 1
+                    if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                        num_L += 1
+                    if list(self.start[self.i].keys())[0] == 'RFBreaket':
+                        num_L -= 1
+                        break
                     expr = self.expr()
-                    if_expr.children.append(expr)
+                    if expr is not None:
+                        if_expr.children.append(expr)
 
             if_expr.children.append(Node('RFBreaket', height=start_height))
 
             if self.i < len(self.start) - 1:
-                print(self.start[self.i])
                 self.check_next('ELSE')
                 self.i += 1
                 self.check_next('LFBreaket')
@@ -119,13 +95,22 @@ class Parser:
 
                     if list(self.start[self.i].keys())[0] == 'RFBreaket':
                         num_L -= 1
+                    if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                        num_L += 1
                     if num_L:
                         self.i += 1
                         self.height = start_height
                         self.height += 1
+                        if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                            num_L += 1
+                        if list(self.start[self.i].keys())[0] == 'RFBreaket':
+                            num_L -= 1
+                            break
                         expr = self.expr()
-                        if_expr.children.append(expr)
+                        if expr is not None:
+                            if_expr.children.append(expr)
 
+                if_expr.children.append(Node('RFBreaket', height=start_height))
             return if_expr
 
     def while_expr(self):
@@ -133,7 +118,7 @@ class Parser:
         self.height += 1
         start_height = self.height
         self.check_next('LBreaket')
-        while_expr.children.append(Node('LBreaket', height=self.height))
+        while_expr.children.append(Leaf('LBreaket', '(', height=self.height))
         self.i += 2
         self.height += 1
         token = list(self.start[self.i].keys())[0]
@@ -148,15 +133,23 @@ class Parser:
             num_L = 1
 
             while num_L:
-                print(self.i, len(self.start))
                 if list(self.start[self.i].keys())[0] == 'RFBreaket':
                     num_L -= 1
-                self.i += 1
+                if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                    num_L += 1
+
                 if num_L:
+                    self.i += 1
                     self.height = start_height
                     self.height += 1
+                    if list(self.start[self.i].keys())[0] == 'LFBreaket':
+                        num_L += 1
+                    if list(self.start[self.i].keys())[0] == 'RFBreaket':
+                        num_L -= 1
+                        break
                     expr = self.expr()
-                    while_expr.children.append(expr)
+                    if expr is not None:
+                        while_expr.children.append(expr)
 
             while_expr.children.append(Node('RFBreaket', height=start_height))
             return while_expr
@@ -166,7 +159,8 @@ class Parser:
     def math_logic(self, ht=[]):
         token = list(self.start[self.i].keys())[0]
 
-        if not token == 'RBreaket' or not token == 'LOGICAL_OP' or not token == 'OP':
+        if not token == 'RBreaket' or not token == 'LOGICAL_OP' \
+                or not token == 'OP':
             math_logic = Node('math_logic', height=self.height)
         else:
             math_logic = ''
@@ -179,7 +173,7 @@ class Parser:
 
         elif token == 'RBreaket':
             self.height = ht.pop(-1)
-            math_logic = Node('RBreaket', height=self.height)
+            math_logic = Node('RBreaket',  height=self.height)
 
         elif token == 'NUMBER':
             math_logic.children.append(Leaf(list(self.start[self.i].keys())[0],
@@ -229,7 +223,8 @@ class Parser:
 
         elif token == 'LOGICAL_OP':
             self.height -= 1
-            math_logic = Node('LOGICAL_OP' + list(self.start[self.i].values())[0],
+            math_logic = Node('LOGICAL_OP' +
+                              list(self.start[self.i].values())[0],
                               height=self.height)
 
         elif token == 'OP':
@@ -299,7 +294,7 @@ class Parser:
             self.height = ht.pop(-1)
             if self.LB < 0:
                 raise BaseException
-            math_expr = Node('RBreaket', height=self.height)
+            math_expr = Node('RBreaket', value=')', height=self.height)
 
         elif token == 'NUMBER':
             math_expr.children.append(Leaf(list(self.start[self.i].keys())[0],
@@ -348,12 +343,31 @@ class Parser:
 
     def LBreaket(self):
         self.LB += 1
-        LBreaket = Node('LBreaket', height=self.height)
+        LBreaket = Leaf('LBreaket', '(', height=self.height)
 
         return LBreaket
 
 
-L = Lexer()
-L.get_term('q.txt')
-P = Parser(L.list_tokens)
-print(P.S())
+class Node:
+    def __init__(self, name='', value='', height=0):
+        self.children = []
+        self.name = name
+        self.value = value
+        self.height = height
+        self.buffer = []
+
+    def __repr__(self):
+        str_end = ''
+        for child in self.children:
+            str_end += "\t" * child.height + f'{child}'
+        return f'{self.name}\n{str_end}'
+
+
+class Leaf:
+    def __init__(self, name='', value='', height=0):
+        self.name = name
+        self.value = value
+        self.height = height
+
+    def __repr__(self):
+        return f'{self.name} {self.value}\n'
