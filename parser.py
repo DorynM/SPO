@@ -10,35 +10,71 @@ class Parser:
         while self.i < len(self.start) - 1:
             self.height = 1
             expr = self.expr()
-            S.children.append(expr)
+            if expr is not None:
+                S.children.append(expr)
             self.i += 1
 
         return S
 
     def expr(self):
-        expr = Node('expr', height=self.height)
+        try:
+            expr = Node('expr', height=self.height)
+            self.height += 1
+
+            token = list(self.start[self.i].keys())[0]
+
+            if token == "VAR":
+                try:
+                    assign_expr = self.assign_expr()
+                    expr.children.append(assign_expr)
+                    self.height -= 1
+                    return expr
+
+                except BaseException:
+                    expr.children.append(Leaf(list(self.start[self.i].keys())[0], list(self.start[self.i].values())[0],
+                                              self.height))
+                    self.check_next('POINT')
+                    self.i += 1
+                    method = self.method()
+                    expr.children.append(method)
+                    return expr
+
+            elif token == 'WHILE':
+                while_expr = self.while_expr()
+                expr.children.append(while_expr)
+                self.height -= 1
+                return expr
+
+            elif token == 'IF':
+                if_expr = self.if_expr()
+                expr.children.append(if_expr)
+                self.height -= 1
+                return expr
+
+            else:
+                return None
+        except BaseException:
+            raise BaseException
+
+    def method(self):
+        method = Node('method', height=self.height)
         self.height += 1
+        self.check_next('METHOD')
+        self.i += 1
+        method.children.append(Leaf(name=list(self.start[self.i].keys())[0], value=list(self.start[self.i].values())[0],
+                               height=self.height))
+        self.height += 1
+        self.check_next('LBreaket')
+        self.i += 1
+        method.children.append(Leaf(name=list(self.start[self.i].keys())[0], value=list(self.start[self.i].values())[0],
+                                    height=self.height))
+        math_expr = self.math_expr()
+        method.children.append(math_expr)
 
-        token = list(self.start[self.i].keys())[0]
-        if token == "VAR":
-            assign_expr = self.assign_expr()
-            expr.children.append(assign_expr)
-            self.height -= 1
-            return expr
+        if not list(self.start[self.i].keys())[0] == 'END_COM':
+            raise BaseException
 
-        elif token == 'WHILE':
-            while_expr = self.while_expr()
-            expr.children.append(while_expr)
-            self.height -= 1
-            return expr
-
-        elif token == 'IF':
-            if_expr = self.if_expr()
-            expr.children.append(if_expr)
-            self.height -= 1
-            return expr
-
-        return expr
+        return method
 
     def if_expr(self):
         height = self.height
@@ -274,11 +310,15 @@ class Parser:
             math_expr = self.math_expr()
             assign_expr.children.append(math_expr)
 
+        elif token == 'LINKED_LIST_KW':
+            self.height += 1
+            assign_expr.children.append(Leaf('LINKED_LIST_KW', list(self.start[self.i].values())[0], self.height))
+
         return assign_expr
 
     def math_expr(self, ht=[]):
         token = list(self.start[self.i].keys())[0]
-        if not token == 'RBreaket' or not token == 'OP':
+        if not token == 'RBreaket' or not token == 'OP' or not token == 'POINT':
             math_expr = Node('math_expr', height=self.height)
         else:
             math_expr = ''
@@ -331,6 +371,9 @@ class Parser:
                                                         values())[0],
                                                    self.height))
 
+        elif token == 'POINT':
+            math_expr = self.method()
+            self.i -= 1
         elif not token == 'END_COM':
             raise BaseException
 

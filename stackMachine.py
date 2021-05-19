@@ -1,12 +1,14 @@
 import re
 from Lexer import Lexer
+from LinkedList import LinkedList
 
 
 class StackMachine:
-    pr = {'(': 0, ')': 1, '=': 1, '==': 2, '!=': 2, '>': 3, '>=': 3, '<': 3,
-          '<=': 3, '+': 4, '-': 4, '*': 5, '/': 5}
+    pr = {'(': 0, ')': 1, '=': 1, '==': 3, '!=': 3, '>': 4, '>=': 4, '<': 4, '<=': 4, '+': 5, '-': 5, '*': 6, '/': 6,
+          'contains': 7, 'remove': 7, 'push': 7, 'get': 7}
     log_op = ['==', '!=', '>', '>=', '<', '<=']
     op = ['+', '-', '*', '/']
+    list_com = ['contains', 'remove', 'push', 'get']
 
     def __init__(self, inp):
         self.stack = []
@@ -22,31 +24,44 @@ class StackMachine:
     def bin_log_op(a, b, op):
         if op == '>':
             return a > b
-        if op == '<':
+        elif op == '<':
             return a < b
-        if op == '>=':
+        elif op == '>=':
             return a >= b
-        if op == '<=':
+        elif op == '<=':
             return a <= b
-        if op == '==':
+        elif op == '==':
             return a == b
-        if op == '!=':
+        elif op == '!=':
             return a != b
 
     @staticmethod
     def bin_op(a, b, op):
         if op == '+':
             return a + b
-        if op == '-':
+        elif op == '-':
             return a - b
-        if op == '*':
+        elif op == '*':
             return a * b
-        if op == '/':
+        elif op == '/':
             return a / b
+
+    @staticmethod
+    def methodList(a, b, op):
+        if op == 'push':
+            a.push(b)
+        elif op == 'remove':
+            a.remove(b)
+        elif op == 'get':
+            a.get(b)
+        elif op == 'contains':
+            a.contains(b)
 
     def assign(self, a, b):
         if re.fullmatch(r"0|([1-9][0-9]*)", str(b)):
             self.variables[a] = int(b)
+        elif b == 'LinkedList':
+            self.variables[a] = LinkedList()
         else:
             self.variables[a] = b
 
@@ -54,7 +69,7 @@ class StackMachine:
         if item.name == 'while_expr':
             self.buf.append({self.nl: len(self.output)})
 
-        if item.name not in Lexer.token:
+        if item.name not in Lexer.token and not item.name == 'METHOD':
             for i in item.children:
                 self.abs(i)
 
@@ -95,7 +110,7 @@ class StackMachine:
                     self.output.reverse()
                     self.bufel.pop(-1)
 
-            if item.name in ['VAR', 'NUMBER', 'STR']:
+            if item.name in ['VAR', 'NUMBER', 'STR', 'LINKED_LIST_KW']:
                 self.output.append(str(item.value))
 
             else:
@@ -121,16 +136,12 @@ class StackMachine:
                         self.stack.append(item.value)
 
     def start(self):
-        try:
-            for item in self.input:
-                self.abs(item)
-                self.stack = []
-            print(self.output)
-            self.compilation()
-            print(self.variables)
-
-        except BaseException:
-            raise BaseException
+        for item in self.input:
+            self.abs(item)
+            self.stack = []
+        print(self.output)
+        self.compilation()
+        print(self.variables)
 
     def compilation(self):
         k = 0
@@ -185,7 +196,6 @@ class StackMachine:
                 a = self.stack.pop(-1)
                 op = self.output[k]
                 k += 1
-
                 if op == '=':
                     self.assign(a, b)
 
@@ -203,3 +213,6 @@ class StackMachine:
                     else:
                         b = int(b)
                     self.stack.append(self.bin_op(a, b, op))
+
+                elif op in self.list_com:
+                    self.stack.append(self.methodList(self.variables[a], b, op))

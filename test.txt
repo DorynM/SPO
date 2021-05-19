@@ -1,11 +1,16 @@
 a = 5;
 b = 1;
 c = 3;
+d = LinkedList;
+d.push(5);
+d.push(1);
+d.push(2);
+d.push(4);
 while (a > b)
 {
     if (a > c)
     {
-        c = b - 3;
+        c = b - d.get(3);
     }
     else
     {
@@ -20,4 +25,5 @@ while (a > b)
     }
     c = a + 5;
 }
+d.remove(2);
 a = a + 4;

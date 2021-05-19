@@ -9,8 +9,5 @@ if __name__ == '__main__':
     P = Parser(L.list_tokens)
     Tree = P.S()
     print('Tree:\n', Tree)
-    try:
-        StackMachine = StackMachine(Tree.children)
-        StackMachine.start()
-    except BaseException:
-        print('Syntax error')
+    StackMachine = StackMachine(Tree.children)
+    StackMachine.start()
