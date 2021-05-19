@@ -136,12 +136,15 @@ class StackMachine:
                         self.stack.append(item.value)
 
     def start(self):
-        for item in self.input:
-            self.abs(item)
-            self.stack = []
-        print(self.output)
-        self.compilation()
-        print(self.variables)
+        try:
+            for item in self.input:
+                self.abs(item)
+                self.stack = []
+            print(self.output)
+            self.compilation()
+            print(self.variables)
+        except BaseException:
+            raise BaseException
 
     def compilation(self):
         k = 0
